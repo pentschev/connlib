@@ -58,10 +58,18 @@ bool EdgeEqual::operator()(const Edge& e1, const Edge& e2)
 
 bool compareEdgeList(EdgeList& list1, EdgeList& list2, double eps)
 {
+    if (list1.size() != list2.size()) return false;
+
     list1.sort(Edge::greater);
     list2.sort(Edge::greater);
+
     return std::equal(list1.begin(), list1.end(), list2.begin(),
                       EdgeEqual(1e-3f));
+}
+
+void addNode(NodeList& list, const float x, const float y)
+{
+    list.push_back(Node(x, y));
 }
 
 void addEdge(EdgeList& list, const float n1X, const float n1Y,

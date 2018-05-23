@@ -56,6 +56,8 @@ private:
 
 bool compareEdgeList(EdgeList& list1, EdgeList& list2, double eps = 1e-3f);
 
+void addNode(NodeList& list, const float x, const float y);
+
 void addEdge(EdgeList& list, const float n1X, const float n1Y,
                     const float n2X, const float n2Y, const float length);
 
