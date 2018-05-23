@@ -34,82 +34,29 @@
 
 #pragma once
 
-#include <cfloat>
-#include <cstddef>
-#include <cmath>
-#include <limits>
-#include <memory>
-#include <list>
+#include <connlib/types.h>
 
 namespace connlib
 {
 
-
-struct Node
+struct EdgeLengthGreater
 {
-    Node()
-        : x(std::numeric_limits<float>::quiet_NaN()),
-          y(std::numeric_limits<float>::quiet_NaN()),
-          index(-1)
-    {}
-
-    Node(const float x, const float y)
-        : x(x), y(y), index(-1)
-    {}
-
-    float x;
-    float y;
-    size_t index;
+    bool operator()(const Edge& e1, const Edge& e2);
 };
 
-typedef std::shared_ptr<Node> NodePtr;
-typedef std::list<Node> NodeList;
-typedef std::list<NodePtr> NodePtrList;
-
-struct Edge
+struct EdgeEqual
 {
-    Edge()
-        : node1(nullptr),
-          node2(nullptr),
-          length(std::numeric_limits<double>::quiet_NaN())
-    {}
+    EdgeEqual(double eps);
 
-    Edge(const NodePtr& node1, const NodePtr& node2, const double length)
-        : node1(node1), node2(node2), length(length)
-    {}
+    bool operator()(const Edge& e1, const Edge& e2);
 
-    static bool equal(const Edge& e1, const Edge& e2, double eps = 1e-3)
-    {
-        return (std::abs(e1.node1->x - e2.node1->x) < eps &&
-                std::abs(e1.node1->y - e2.node1->y) < eps &&
-                std::abs(e1.node2->x - e2.node2->x) < eps &&
-                std::abs(e1.node2->y - e2.node2->y) < eps &&
-                std::abs(e1.length - e2.length) < eps);
-    }
-
-    static bool greater(const Edge& e1, const Edge& e2)
-    {
-        if (e1.node1->x < e2.node1->x) return true;
-        if (e1.node1->y < e2.node1->y) return true;
-        if (e1.node2->x < e2.node2->x) return true;
-        if (e1.node2->y < e2.node2->y) return true;
-        if (e1.length < e2.length) return true;
-        return false;
-    }
-
-    NodePtr node1;
-    NodePtr node2;
-    double length;
+private:
+    double m_eps;
 };
 
-typedef std::list<Edge> EdgeList;
+bool compareEdgeList(EdgeList& list1, EdgeList& list2, double eps = 1e-3f);
 
-typedef enum
-{
-    CONNLIB_SUCCESS = 0,
-    CONNLIB_NEGATIVE_COORDINATE,
-    CONNLIB_NAN_COORDINATE,
-    CONNLIB_INF_COORDINATE
-} ConnLibStatus;
+void addEdge(EdgeList& list, const float n1X, const float n1Y,
+                    const float n2X, const float n2Y, const float length);
 
-} // namespace lib
+} // namespace connlib

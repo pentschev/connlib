@@ -33,6 +33,7 @@
  ******************************************************************************/
 
 #include <connlib/connlib.h>
+#include <connlib/utils.h>
 
 #include <cfloat>
 #include <cmath>
@@ -122,7 +123,7 @@ ConnLibStatus ConnLibSolver::operator()(const NodeList& nodes)
     std::vector<bool> visited(N, false);
     std::vector<double> bestLength(N, FLT_MAX);
 
-    std::priority_queue<Edge, std::vector<Edge>, EdgeGreater> q;
+    std::priority_queue<Edge, std::vector<Edge>, EdgeLengthGreater> q;
 
     NodePtr frontNode = m_nodes.front();
     q.push(Edge(nullptr, frontNode, 0.0f));

@@ -32,84 +32,45 @@
  *
  ******************************************************************************/
 
-#pragma once
-
-#include <cfloat>
-#include <cstddef>
-#include <cmath>
-#include <limits>
-#include <memory>
-#include <list>
+#include <connlib/utils.h>
 
 namespace connlib
 {
 
-
-struct Node
+bool EdgeLengthGreater::operator()(const Edge& e1, const Edge& e2)
 {
-    Node()
-        : x(std::numeric_limits<float>::quiet_NaN()),
-          y(std::numeric_limits<float>::quiet_NaN()),
-          index(-1)
-    {}
+    return e1.length > e2.length;
+}
 
-    Node(const float x, const float y)
-        : x(x), y(y), index(-1)
-    {}
-
-    float x;
-    float y;
-    size_t index;
-};
-
-typedef std::shared_ptr<Node> NodePtr;
-typedef std::list<Node> NodeList;
-typedef std::list<NodePtr> NodePtrList;
-
-struct Edge
+EdgeEqual::EdgeEqual(double eps)
+    : m_eps(eps)
 {
-    Edge()
-        : node1(nullptr),
-          node2(nullptr),
-          length(std::numeric_limits<double>::quiet_NaN())
-    {}
+}
 
-    Edge(const NodePtr& node1, const NodePtr& node2, const double length)
-        : node1(node1), node2(node2), length(length)
-    {}
-
-    static bool equal(const Edge& e1, const Edge& e2, double eps = 1e-3)
-    {
-        return (std::abs(e1.node1->x - e2.node1->x) < eps &&
-                std::abs(e1.node1->y - e2.node1->y) < eps &&
-                std::abs(e1.node2->x - e2.node2->x) < eps &&
-                std::abs(e1.node2->y - e2.node2->y) < eps &&
-                std::abs(e1.length - e2.length) < eps);
-    }
-
-    static bool greater(const Edge& e1, const Edge& e2)
-    {
-        if (e1.node1->x < e2.node1->x) return true;
-        if (e1.node1->y < e2.node1->y) return true;
-        if (e1.node2->x < e2.node2->x) return true;
-        if (e1.node2->y < e2.node2->y) return true;
-        if (e1.length < e2.length) return true;
-        return false;
-    }
-
-    NodePtr node1;
-    NodePtr node2;
-    double length;
-};
-
-typedef std::list<Edge> EdgeList;
-
-typedef enum
+bool EdgeEqual::operator()(const Edge& e1, const Edge& e2)
 {
-    CONNLIB_SUCCESS = 0,
-    CONNLIB_NEGATIVE_COORDINATE,
-    CONNLIB_NAN_COORDINATE,
-    CONNLIB_INF_COORDINATE
-} ConnLibStatus;
+    return (std::abs(e1.node1->x - e2.node1->x) < m_eps &&
+            std::abs(e1.node1->y - e2.node1->y) < m_eps &&
+            std::abs(e1.node2->x - e2.node2->x) < m_eps &&
+            std::abs(e1.node2->y - e2.node2->y) < m_eps &&
+            std::abs(e1.length - e2.length) < m_eps);
+}
 
-} // namespace lib
+bool compareEdgeList(EdgeList& list1, EdgeList& list2, double eps)
+{
+    list1.sort(Edge::greater);
+    list2.sort(Edge::greater);
+    return std::equal(list1.begin(), list1.end(), list2.begin(),
+                      EdgeEqual(1e-3f));
+}
+
+void addEdge(EdgeList& list, const float n1X, const float n1Y,
+        const float n2X, const float n2Y, const float length)
+{
+    NodePtr node1(std::make_shared<connlib::Node>(n1X, n1Y));
+    NodePtr node2(std::make_shared<connlib::Node>(n2X, n2Y));
+    Edge edge(node1, node2, length);
+    list.push_back(edge);
+}
+
+} // namespace connlib
